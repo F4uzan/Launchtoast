@@ -27,7 +27,7 @@ class UserFolderInfo extends FolderInfo {
     /**
      * The apps and shortcuts 
      */
-    ArrayList<ApplicationInfo> contents = new ArrayList<ApplicationInfo>();
+    ArrayList<ApplicationInfo> contents = new ArrayList<>();
     
     UserFolderInfo() {
         itemType = LauncherSettings.Favorites.ITEM_TYPE_USER_FOLDER;

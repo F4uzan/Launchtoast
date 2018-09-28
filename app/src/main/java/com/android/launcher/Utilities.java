@@ -16,18 +16,17 @@
 
 package com.android.launcher;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.graphics.Bitmap;
-import android.graphics.PixelFormat;
-import android.graphics.Canvas;
-import android.graphics.PaintFlagsDrawFilter;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.util.DisplayMetrics;
-import android.content.res.Resources;
-import android.content.Context;
 
 /**
  * Various utilities shared amongst the Launcher's classes.
@@ -106,7 +105,7 @@ final class Utilities {
         int iconHeight = icon.getIntrinsicHeight();
 
         if (width > 0 && height > 0) {
-            if (width < iconWidth || height < iconHeight || scale != 1.0f) {
+            if (width < iconWidth || height < iconHeight) {
                 final float ratio = (float) iconWidth / iconHeight;
 
                 if (iconWidth > iconHeight) {

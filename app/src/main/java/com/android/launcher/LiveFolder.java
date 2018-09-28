@@ -56,7 +56,9 @@ public class LiveFolder extends Folder {
             if (baseIntent != null) {
                 final Intent intent = new Intent(baseIntent);
                 Uri uri = baseIntent.getData();
-                uri = uri.buildUpon().appendPath(Long.toString(holder.id)).build();
+                if (uri != null) {
+                    uri = uri.buildUpon().appendPath(Long.toString(holder.id)).build();
+                }
                 intent.setData(uri);
                 mLauncher.startActivitySafely(intent);
             }
@@ -104,7 +106,7 @@ public class LiveFolder extends Folder {
         private LiveFolderInfo mInfo;
 
         FolderLoadingTask(LiveFolder folder) {
-            mFolder = new WeakReference<LiveFolder>(folder);
+            mFolder = new WeakReference<>(folder);
         }
 
         protected Cursor doInBackground(LiveFolderInfo... params) {

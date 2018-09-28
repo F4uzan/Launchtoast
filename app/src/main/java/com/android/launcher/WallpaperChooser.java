@@ -107,14 +107,14 @@ public class WallpaperChooser extends Activity implements AdapterView.OnItemSele
         Button b = (Button) findViewById(R.id.set);
         b.setOnClickListener(this);
 
-        mImageView = (ImageView) findViewById(R.id.wallpaper);
+        mImageView = findViewById(R.id.wallpaper);
     }
 
     private void findWallpapers() {
-        mThumbs = new ArrayList<Integer>(THUMB_IDS.length + 4);
+        mThumbs = new ArrayList<>(THUMB_IDS.length + 4);
         Collections.addAll(mThumbs, THUMB_IDS);
 
-        mImages = new ArrayList<Integer>(IMAGE_IDS.length + 4);
+        mImages = new ArrayList<>(IMAGE_IDS.length + 4);
         Collections.addAll(mImages, IMAGE_IDS);
 
         final Resources resources = getResources();

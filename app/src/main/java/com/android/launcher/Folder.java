@@ -68,7 +68,7 @@ public class Folder extends LinearLayout implements DragSource, OnItemLongClickL
         mContent.setOnItemClickListener(this);
         mContent.setOnItemLongClickListener(this);
         
-        mCloseButton = (Button) findViewById(R.id.close);
+        mCloseButton = findViewById(R.id.close);
         mCloseButton.setOnClickListener(this);
         mCloseButton.setOnLongClickListener(this);
     }

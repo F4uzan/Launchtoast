@@ -40,9 +40,9 @@ class LiveFolderAdapter extends CursorAdapter {
     private boolean mIsList;
     private LayoutInflater mInflater;
 
-    private final HashMap<String, Drawable> mIcons = new HashMap<String, Drawable>();
+    private final HashMap<String, Drawable> mIcons = new HashMap<>();
     private final HashMap<Long, SoftReference<Drawable>> mCustomIcons =
-            new HashMap<Long, SoftReference<Drawable>>();
+            new HashMap<>();
     private final Launcher mLauncher;
 
     LiveFolderAdapter(Launcher launcher, LiveFolderInfo info, Cursor cursor) {

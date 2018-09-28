@@ -870,9 +870,9 @@ out:            for (int i = x; i < x + spanX - 1 && x < xCount; i++) {
 
     static final class CellInfo implements ContextMenu.ContextMenuInfo {
         /**
-         * See View.AttachInfo.InvalidateInfo for futher explanations about
+         * See View.AttachInfo.InvalidateInfo for further explanations about
          * the recycling mechanism. In this case, we recycle the vacant cells
-         * instances because up to several hundreds can be instanciated when
+         * instances because up to several hundreds can be instantiated when
          * the user long presses an empty cell.
          */
         static final class VacantCell {
@@ -932,7 +932,7 @@ out:            for (int i = x; i < x + spanX - 1 && x < xCount; i++) {
         int screen;
         boolean valid;
 
-        final ArrayList<VacantCell> vacantCells = new ArrayList<VacantCell>(VacantCell.POOL_LIMIT);
+        final ArrayList<VacantCell> vacantCells = new ArrayList<>(VacantCell.POOL_LIMIT);
         int maxVacantSpanX;
         int maxVacantSpanXSpanY;
         int maxVacantSpanY;
@@ -980,7 +980,7 @@ out:            for (int i = x; i < x + spanX - 1 && x < xCount; i++) {
          * @return True if a vacant cell of the specified dimension was found, false otherwise.
          */
         boolean findCellForSpan(int[] cellXY, int spanX, int spanY) {
-            return findCellForSpan(cellXY, spanX, spanY, true);
+            return !findCellForSpan(cellXY, spanX, spanY, true);
         }
 
         boolean findCellForSpan(int[] cellXY, int spanX, int spanY, boolean clear) {

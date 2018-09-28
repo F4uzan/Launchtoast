@@ -127,9 +127,10 @@ public class LauncherProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         db.beginTransaction();
         try {
-            int numValues = values.length;
-            for (int i = 0; i < numValues; i++) {
-                if (db.insert(args.table, null, values[i]) < 0) return 0;
+            for (ContentValues value : values) {
+                if (db.insert(args.table, null, value) < 0) {
+                    return 0;
+                }
             }
             db.setTransactionSuccessful();
         } finally {
@@ -170,7 +171,6 @@ public class LauncherProvider extends ContentProvider {
     }
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final String TAG_FAVORITES = "favorites";
         private static final String TAG_FAVORITE = "favorite";
         private static final String TAG_CLOCK = "clock";
         private static final String TAG_SEARCH = "search";
@@ -426,7 +426,7 @@ public class LauncherProvider extends ContentProvider {
                 if (LOGD) Log.d(LOG_TAG, "found upgrade cursor count="+c.getCount());
                 
                 final ContentValues values = new ContentValues();
-                while (c != null && c.moveToNext()) {
+                while (c.moveToNext()) {
                     long favoriteId = c.getLong(0);
                     
                     // Allocate and update database with new appWidgetId
@@ -492,13 +492,12 @@ public class LauncherProvider extends ContentProvider {
          *
          * @param db The database to write the values into
          */
-        private int loadFavorites(SQLiteDatabase db) {
+        private void loadFavorites(SQLiteDatabase db) {
             Intent intent = new Intent(Intent.ACTION_MAIN, null);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             ContentValues values = new ContentValues();
 
             PackageManager packageManager = mContext.getPackageManager();
-            int i = 0;
             try {
                 XmlResourceParser parser = mContext.getResources().getXml(R.xml.default_workspace);
                 AttributeSet attrs = Xml.asAttributeSet(parser);
@@ -536,7 +535,7 @@ public class LauncherProvider extends ContentProvider {
                         added = addClockWidget(db, values);
                     }
 
-                    if (added) i++;
+                    if (added) ;
 
                     a.recycle();
                 }
@@ -546,7 +545,6 @@ public class LauncherProvider extends ContentProvider {
                 Log.w(LOG_TAG, "Got exception parsing favorites.", e);
             }
 
-            return i;
         }
 
         private boolean addShortcut(SQLiteDatabase db, ContentValues values, TypedArray a,
@@ -590,7 +588,7 @@ public class LauncherProvider extends ContentProvider {
                     Favorites.ITEM_TYPE_WIDGET_CLOCK,
             };
 
-            final ArrayList<ComponentName> bindTargets = new ArrayList<ComponentName>();
+            final ArrayList<ComponentName> bindTargets = new ArrayList<>();
             bindTargets.add(new ComponentName("com.android.alarmclock",
                     "com.android.alarmclock.AnalogAppWidgetProvider"));
 
@@ -636,9 +634,9 @@ public class LauncherProvider extends ContentProvider {
     }
 
     static class SqlArguments {
-        public final String table;
-        public final String where;
-        public final String[] args;
+        final String table;
+        final String where;
+        final String[] args;
 
         SqlArguments(Uri url, String where, String[] args) {
             if (url.getPathSegments().size() == 1) {

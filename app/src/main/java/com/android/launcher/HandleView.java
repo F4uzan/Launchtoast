@@ -62,7 +62,7 @@ public class HandleView extends ImageView {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         final boolean handled = super.onKeyDown(keyCode, event);
 
-        if (!handled && !mLauncher.isDrawerDown() && !isDirectionKey(keyCode)) {
+        if (!handled && !mLauncher.isDrawerDown() && isNotDirectionKey(keyCode)) {
             return mLauncher.getApplicationsGrid().onKeyDown(keyCode, event);
         }
 
@@ -73,16 +73,16 @@ public class HandleView extends ImageView {
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         final boolean handled = super.onKeyUp(keyCode, event);
 
-        if (!handled && !mLauncher.isDrawerDown() && !isDirectionKey(keyCode)) {
+        if (!handled && !mLauncher.isDrawerDown() && isNotDirectionKey(keyCode)) {
             return mLauncher.getApplicationsGrid().onKeyUp(keyCode, event);
         }
 
         return handled;
     }
 
-    private static boolean isDirectionKey(int keyCode) {
-        return keyCode == KeyEvent.KEYCODE_DPAD_DOWN || keyCode == KeyEvent.KEYCODE_DPAD_LEFT ||
-                keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_DPAD_UP;
+    private static boolean isNotDirectionKey(int keyCode) {
+        return keyCode != KeyEvent.KEYCODE_DPAD_DOWN && keyCode != KeyEvent.KEYCODE_DPAD_LEFT &&
+                keyCode != KeyEvent.KEYCODE_DPAD_RIGHT && keyCode != KeyEvent.KEYCODE_DPAD_UP;
     }
 
     void setLauncher(Launcher launcher) {

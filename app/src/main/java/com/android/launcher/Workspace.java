@@ -400,10 +400,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
      */
     boolean getVacantCell(int[] vacant, int spanX, int spanY) {
         CellLayout group = (CellLayout) getChildAt(mCurrentScreen);
-        if (group != null) {
-            return group.getVacantCell(vacant, spanX, spanY);
-        }
-        return false;
+        return group != null && group.getVacantCell(vacant, spanX, spanY);
     }
 
     /**
@@ -474,11 +471,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
 
     @Override
     public boolean isOpaque() {
-        if (mWallpaperLoaded) {
-            return !mWallpaper.hasAlpha();
-        } else {
-            return true;
-        }
+        return !mWallpaperLoaded || !mWallpaper.hasAlpha();
     }
 
     @Override
@@ -707,9 +700,9 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                 final int touchSlop = mTouchSlop;
                 boolean xMoved = xDiff > touchSlop;
                 boolean yMoved = yDiff > touchSlop;
-                
+
                 if (xMoved || yMoved) {
-                    
+
                     if (xMoved) {
                         // Scroll if the user moved far enough along the X axis
                         mTouchState = TOUCH_STATE_SCROLLING;
@@ -865,14 +858,14 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
 
         whichScreen = Math.max(0, Math.min(whichScreen, getChildCount() - 1));
         boolean changingScreens = whichScreen != mCurrentScreen;
-        
+
         mNextScreen = whichScreen;
-        
+
         View focusedChild = getFocusedChild();
         if (focusedChild != null && changingScreens && focusedChild == getChildAt(mCurrentScreen)) {
             focusedChild.clearFocus();
         }
-        
+
         final int newX = whichScreen * getWidth();
         final int delta = newX - mScrollX;
         mScroller.startScroll(mScrollX, 0, delta, 0, Math.abs(delta) * 2);
@@ -1229,7 +1222,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     }
 
     void removeShortcutsForPackage(String packageName) {
-        final ArrayList<View> childrenToRemove = new ArrayList<View>();
+        final ArrayList<View> childrenToRemove = new ArrayList<>();
         final LauncherModel model = Launcher.getModel();
         final int count = getChildCount();
 
@@ -1260,7 +1253,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                 } else if (tag instanceof UserFolderInfo) {
                     final UserFolderInfo info = (UserFolderInfo) tag;
                     final ArrayList<ApplicationInfo> contents = info.contents;
-                    final ArrayList<ApplicationInfo> toRemove = new ArrayList<ApplicationInfo>(1);
+                    final ArrayList<ApplicationInfo> toRemove = new ArrayList<>(1);
                     final int contentsCount = contents.size();
                     boolean removedFromFolder = false;
 

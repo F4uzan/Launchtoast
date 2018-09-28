@@ -34,7 +34,7 @@ public class AddAdapter extends BaseAdapter {
 
     private final LayoutInflater mInflater;
     
-    private final ArrayList<ListItem> mItems = new ArrayList<ListItem>();
+    private final ArrayList<ListItem> mItems = new ArrayList<>();
     
     public static final int ITEM_SHORTCUT = 0;
     public static final int ITEM_APPWIDGET = 1;
@@ -46,10 +46,10 @@ public class AddAdapter extends BaseAdapter {
      */
     public class ListItem {
         public final CharSequence text;
-        public final Drawable image;
-        public final int actionTag;
+        final Drawable image;
+        final int actionTag;
         
-        public ListItem(Resources res, int textResourceId, int imageResourceId, int actionTag) {
+        ListItem(Resources res, int textResourceId, int imageResourceId, int actionTag) {
             text = res.getString(textResourceId);
             if (imageResourceId != -1) {
                 image = res.getDrawable(imageResourceId);
@@ -60,7 +60,7 @@ public class AddAdapter extends BaseAdapter {
         }
     }
     
-    public AddAdapter(Launcher launcher) {
+    AddAdapter(Launcher launcher) {
         super();
 
         mInflater = (LayoutInflater) launcher.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

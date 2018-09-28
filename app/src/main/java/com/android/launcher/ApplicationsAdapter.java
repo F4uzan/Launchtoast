@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public class ApplicationsAdapter extends ArrayAdapter<ApplicationInfo> {
     private final LayoutInflater mInflater;
 
-    public ApplicationsAdapter(Context context, ArrayList<ApplicationInfo> apps) {
+    ApplicationsAdapter(Context context, ArrayList<ApplicationInfo> apps) {
         super(context, 0, apps);
         mInflater = LayoutInflater.from(context);
     }
@@ -44,14 +44,16 @@ public class ApplicationsAdapter extends ArrayAdapter<ApplicationInfo> {
             convertView = mInflater.inflate(R.layout.application_boxed, parent, false);
         }
 
-        if (!info.filtered) {
+        if (info != null && !info.filtered) {
             info.icon = Utilities.createIconThumbnail(info.icon, getContext());
             info.filtered = true;
         }
 
         final TextView textView = (TextView) convertView;
-        textView.setCompoundDrawablesWithIntrinsicBounds(null, info.icon, null, null);
-        textView.setText(info.title);
+        if (info != null) {
+            textView.setCompoundDrawablesWithIntrinsicBounds(null, info.icon, null, null);
+            textView.setText(info.title);
+        }
 
         return convertView;
     }

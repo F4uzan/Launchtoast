@@ -230,7 +230,7 @@ public class DeleteZone extends ImageView implements DropTarget, DragController.
     }
 
     private static class FastTranslateAnimation extends TranslateAnimation {
-        public FastTranslateAnimation(int fromXType, float fromXValue, int toXType, float toXValue,
+        FastTranslateAnimation(int fromXType, float fromXValue, int toXType, float toXValue,
                 int fromYType, float fromYValue, int toYType, float toYValue) {
             super(fromXType, fromXValue, toXType, toXValue,
                     fromYType, fromYValue, toYType, toYValue);

@@ -47,8 +47,6 @@ public class Search extends LinearLayout
     // Speed at which the widget slides up/down, in pixels/ms.
     private static final float ANIMATION_VELOCITY = 1.0f;
 
-    private final String TAG = "SearchWidget";
-
     private Launcher mLauncher;
 
     private TextView mSearchText;
@@ -70,8 +68,6 @@ public class Search extends LinearLayout
 
     // For voice searching
     private Intent mVoiceSearchIntent;
-
-    private SearchManager mSearchManager;
 
     /**
      * Used to inflate the Workspace from XML.
@@ -133,8 +129,9 @@ public class Search extends LinearLayout
         mVoiceSearchIntent = new Intent(android.speech.RecognizerIntent.ACTION_WEB_SEARCH);
         mVoiceSearchIntent.putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 android.speech.RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        
-        mSearchManager = (SearchManager) getContext().getSystemService(Context.SEARCH_SERVICE);
+
+        SearchManager mSearchManager = (SearchManager) getContext().getSystemService(
+                Context.SEARCH_SERVICE);
     }
 
     /**
@@ -154,6 +151,7 @@ public class Search extends LinearLayout
         } catch (ActivityNotFoundException ex) {
             // Should not happen, since we check the availability of
             // voice search before showing the button. But just in case...
+            String TAG = "SearchWidget";
             Log.w(TAG, "Could not find voice search activity");
         }
     }
@@ -291,7 +289,7 @@ public class Search extends LinearLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mSearchText = (TextView) findViewById(R.id.search_src_text);
+        mSearchText = findViewById(R.id.search_src_text);
         mVoiceButton = (ImageButton) findViewById(R.id.search_voice_btn);
         
         mSearchText.setOnKeyListener(this);
