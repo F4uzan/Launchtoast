@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
 import android.app.SearchManager;
+import android.app.WallpaperManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
@@ -44,6 +45,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -169,8 +171,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
     private SpannableStringBuilder mDefaultKeySsb = null;
 
     private boolean mDestroyed;
-
-    private boolean mIsNewIntent;
 
     private boolean mRestoring;
     private boolean mWaitingForResult;
@@ -323,13 +323,12 @@ public final class Launcher extends Activity implements View.OnClickListener, On
     }
 
     static LiveFolderInfo addLiveFolder(Context context, Intent data,
-            CellLayout.CellInfo cellInfo, boolean notify) {
+            CellLayout.CellInfo cellInfo) {
 
         Intent baseIntent = data.getParcelableExtra(LiveFolders.EXTRA_LIVE_FOLDER_BASE_INTENT);
         String name = data.getStringExtra(LiveFolders.EXTRA_LIVE_FOLDER_NAME);
 
         Drawable icon = null;
-        boolean filtered = false;
         Intent.ShortcutIconResource iconResource = null;
 
         Parcelable extra = data.getParcelableExtra(LiveFolders.EXTRA_LIVE_FOLDER_ICON);
@@ -352,7 +351,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
 
         final LiveFolderInfo info = new LiveFolderInfo();
         info.icon = icon;
-        info.filtered = filtered;
+        info.filtered = false;
         info.title = name;
         info.iconResource = iconResource;
         info.uri = data.getData();
@@ -361,7 +360,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
                 LiveFolders.DISPLAY_MODE_GRID);
 
         LauncherModel.addItemToDatabase(context, info, LauncherSettings.Favorites.CONTAINER_DESKTOP,
-                cellInfo.screen, cellInfo.cellX, cellInfo.cellY, notify);
+                cellInfo.screen, cellInfo.cellX, cellInfo.cellY, false);
         sModel.addFolder(info);
 
         return info;
@@ -380,10 +379,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
 
         mAppWidgetHost = new LauncherAppWidgetHost(this, APPWIDGET_HOST_ID);
         mAppWidgetHost.startListening();
-
-        if (PROFILE_STARTUP) {
-            android.os.Debug.startMethodTracing("/sdcard/launcher");
-        }
 
         checkForLocaleChange();
 
@@ -494,7 +489,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             startLoaders();
         }
 
-        mIsNewIntent = false;
     }
 
     @Override
@@ -508,10 +502,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         // Flag any binder to stop early before switching
         if (mBinder != null) {
             mBinder.mTerminate = true;
-        }
-
-        if (PROFILE_ROTATE) {
-            android.os.Debug.startMethodTracing("/sdcard/launcher-rotate");
         }
         return null;
     }
@@ -596,21 +586,21 @@ public final class Launcher extends Activity implements View.OnClickListener, On
      * Finds all the views we need and configure them properly.
      */
     private void setupViews() {
-        mDragLayer = (DragLayer) findViewById(R.id.drag_layer);
+        mDragLayer = findViewById(R.id.drag_layer);
         final DragLayer dragLayer = mDragLayer;
 
-        mWorkspace = (Workspace) dragLayer.findViewById(R.id.workspace);
+        mWorkspace = dragLayer.findViewById(R.id.workspace);
         final Workspace workspace = mWorkspace;
 
-        mDrawer = (SlidingDrawer) dragLayer.findViewById(R.id.drawer);
+        mDrawer = dragLayer.findViewById(R.id.drawer);
         final SlidingDrawer drawer = mDrawer;
 
         mAllAppsGrid = (AllAppsGridView) drawer.getContent();
         final AllAppsGridView grid = mAllAppsGrid;
 
-        final DeleteZone deleteZone = (DeleteZone) dragLayer.findViewById(R.id.delete_zone);
+        final DeleteZone deleteZone = dragLayer.findViewById(R.id.delete_zone);
 
-        mHandleView = (HandleView) drawer.findViewById(R.id.all_apps);
+        mHandleView = drawer.findViewById(R.id.all_apps);
         mHandleView.setLauncher(this);
         mHandleIcon = (TransitionDrawable) mHandleView.getDrawable();
         mHandleIcon.setCrossFadeEnabled(true);
@@ -732,7 +722,10 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             boolean insertAtFirst) {
 
         Bundle extras = data.getExtras();
-        int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+        int appWidgetId = 0;
+        if (extras != null) {
+            appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+        }
 
         d(LOG_TAG, "dumping extras content=" + extras.toString());
 
@@ -788,7 +781,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             // Set this flag so that onResume knows to close the search dialog if it's open,
             // because this was a new intent (thus a press of 'home' or some such) rather than
             // for example onResume being called when the user pressed the 'back' button.
-            mIsNewIntent = true;
 
             try {
                 dismissDialog(DIALOG_CREATE_SHORTCUT);
@@ -955,14 +947,18 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             // the Launcher.
             searchManager.setOnCancelListener(new SearchManager.OnCancelListener() {
                 public void onCancel() {
-                    searchManager.setOnCancelListener(null);
+                    if (searchManager != null) {
+                        searchManager.setOnCancelListener(null);
+                    }
                     stopSearch();
                 }
             });
         }
 
-        searchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
-                appSearchData, globalSearch);
+        if (searchManager != null) {
+            searchManager.startSearch(initialQuery, selectInitialQuery, getComponentName(),
+                    appSearchData, globalSearch);
+        }
     }
 
     /**
@@ -1174,7 +1170,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             return;
         }
 
-        final LiveFolderInfo info = addLiveFolder(this, data, cellInfo, false);
+        final LiveFolderInfo info = addLiveFolder(this, data, cellInfo);
 
         if (!mRestoring) {
             sModel.addDesktopItem(info);
@@ -1402,7 +1398,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
                     final View view = mInflater.inflate(R.layout.widget_search,
                             (ViewGroup) workspace.getChildAt(screen), false);
 
-                    Search search = (Search) view.findViewById(R.id.widget_search);
+                    Search search = view.findViewById(R.id.widget_search);
                     search.setLauncher(this);
 
                     final Widget widget = (Widget) item;
@@ -1569,7 +1565,8 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         // The first time the application is started, we load the wallpaper from
         // the ApplicationContext
         if (sWallpaper == null) {
-            final Drawable drawable = getWallpaper();
+            WallpaperManager wallpaperManager = WallpaperManager.getInstance(this);
+            final Drawable drawable = wallpaperManager.getDrawable();
             if (drawable instanceof BitmapDrawable) {
                 sWallpaper = ((BitmapDrawable) drawable).getBitmap();
             } else {
@@ -1580,7 +1577,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
     }
 
     /**
-     * Opens the user fodler described by the specified tag. The opening of the folder
+     * Opens the user folder described by the specified tag. The opening of the folder
      * is animated relative to the specified View. If the View is null, no animation
      * is played.
      *
@@ -1697,7 +1694,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
                 break;
             case DIALOG_RENAME_FOLDER:
                 if (mFolderInfo != null) {
-                    EditText input = (EditText) dialog.findViewById(R.id.folder_name);
+                    EditText input = dialog.findViewById(R.id.folder_name);
                     final CharSequence text = mFolderInfo.title;
                     input.setText(text);
                     input.setSelection(0, text.length());
@@ -1721,11 +1718,11 @@ public final class Launcher extends Activity implements View.OnClickListener, On
     private void pickShortcut(int requestCode, int title) {
         Bundle bundle = new Bundle();
 
-        ArrayList<String> shortcutNames = new ArrayList<String>();
+        ArrayList<String> shortcutNames = new ArrayList<>();
         shortcutNames.add(getString(R.string.group_applications));
         bundle.putStringArrayList(Intent.EXTRA_SHORTCUT_NAME, shortcutNames);
 
-        ArrayList<ShortcutIconResource> shortcutIcons = new ArrayList<ShortcutIconResource>();
+        ArrayList<ShortcutIconResource> shortcutIcons = new ArrayList<>();
         shortcutIcons.add(ShortcutIconResource.fromContext(Launcher.this,
                 R.drawable.ic_launcher_application));
         bundle.putParcelableArrayList(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, shortcutIcons);
@@ -1739,9 +1736,9 @@ public final class Launcher extends Activity implements View.OnClickListener, On
     }
 
     private static class LocaleConfiguration {
-        public String locale;
-        public int mcc = -1;
-        public int mnc = -1;
+        String locale;
+        int mcc = -1;
+        int mnc = -1;
     }
 
     /**
@@ -1794,20 +1791,20 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         private final ApplicationsAdapter mDrawerAdapter;
         private final WeakReference<Launcher> mLauncher;
 
-        public boolean mTerminate = false;
+        boolean mTerminate = false;
 
         DesktopBinder(Launcher launcher, ArrayList<ItemInfo> shortcuts,
                 ArrayList<LauncherAppWidgetInfo> appWidgets,
                 ApplicationsAdapter drawerAdapter) {
 
-            mLauncher = new WeakReference<Launcher>(launcher);
+            mLauncher = new WeakReference<>(launcher);
             mShortcuts = shortcuts;
             mDrawerAdapter = drawerAdapter;
 
             // Sort widgets so active workspace is bound first
             final int currentScreen = launcher.mWorkspace.getCurrentScreen();
             final int size = appWidgets.size();
-            mAppWidgets = new LinkedList<LauncherAppWidgetInfo>();
+            mAppWidgets = new LinkedList<>();
 
             for (int i = 0; i < size; i++) {
                 LauncherAppWidgetInfo appWidgetInfo = appWidgets.get(i);
@@ -1824,18 +1821,18 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             }
         }
 
-        public void startBindingItems() {
+        void startBindingItems() {
             if (LauncherModel.DEBUG_LOADERS) {
                 d(Launcher.LOG_TAG, "------> start binding items");
             }
             obtainMessage(MESSAGE_BIND_ITEMS, 0, mShortcuts.size()).sendToTarget();
         }
 
-        public void startBindingDrawer() {
+        void startBindingDrawer() {
             obtainMessage(MESSAGE_BIND_DRAWER).sendToTarget();
         }
 
-        public void startBindingAppWidgetsWhenIdle() {
+        void startBindingAppWidgetsWhenIdle() {
             // Ask for notification when message queue becomes idle
             final MessageQueue messageQueue = Looper.myQueue();
             messageQueue.addIdleHandler(this);
@@ -1847,7 +1844,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             return false;
         }
 
-        public void startBindingAppWidgets() {
+        void startBindingAppWidgets() {
             obtainMessage(MESSAGE_BIND_APPWIDGETS).sendToTarget();
         }
 
@@ -2175,10 +2172,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         }
 
         public void onScrollStarted() {
-            if (PROFILE_DRAWER) {
-                android.os.Debug.startMethodTracing("/sdcard/launcher-drawer");
-            }
-
             mWorkspace.mDrawerContentWidth = mAllAppsGrid.getWidth();
             mWorkspace.mDrawerContentHeight = mAllAppsGrid.getHeight();
         }
