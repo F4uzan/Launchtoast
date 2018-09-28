@@ -123,7 +123,7 @@ public class CellLayout extends ViewGroup {
         // Generate an id for each view, this assumes we have at most 256x256 cells
         // per workspace screen
         final LayoutParams cellParams = (LayoutParams) params;
-        child.setId(((getId() & 0xFF) << 16) |
+        child.setId(((getId()) << 16) |
                 (cellParams.cellX & 0xFF) << 8 | (cellParams.cellY & 0xFF));
 
         super.addView(child, index, params);
@@ -152,8 +152,8 @@ public class CellLayout extends ViewGroup {
 
         if (action == MotionEvent.ACTION_DOWN) {
             final Rect frame = mRect;
-            final int x = (int) ev.getX() + mScrollX;
-            final int y = (int) ev.getY() + mScrollY;
+            final int x = (int) ev.getX() + getScrollX();
+            final int y = (int) ev.getY() + getScrollY();
             final int count = getChildCount();
 
             boolean found = false;

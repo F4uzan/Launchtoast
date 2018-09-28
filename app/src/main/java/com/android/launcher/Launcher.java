@@ -20,10 +20,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.Dialog;
-import android.app.ISearchManager;
-import android.app.IWallpaperService;
 import android.app.SearchManager;
-import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -52,7 +49,6 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.provider.LiveFolders;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -219,7 +215,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         }
 
         checkForLocaleChange();
-        setWallpaperDimension();
 
         setContentView(R.layout.launcher);
         setupViews();
@@ -340,22 +335,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         mRestoring = false;
     }
 
-    private void setWallpaperDimension() {
-        IBinder binder = ServiceManager.getService(WALLPAPER_SERVICE);
-        IWallpaperService wallpaperService = IWallpaperService.Stub.asInterface(binder);
-
-        Display display = getWindowManager().getDefaultDisplay();
-        boolean isPortrait = display.getWidth() < display.getHeight();
-
-        final int width = isPortrait ? display.getWidth() : display.getHeight();
-        final int height = isPortrait ? display.getHeight() : display.getWidth();
-        try {
-            wallpaperService.setDimensionHints(width * WALLPAPER_SCREENS_SPAN, height);
-        } catch (RemoteException e) {
-            // System is dead!
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mWaitingForResult = false;
@@ -407,26 +386,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         if (mRestoring) {
             startLoaders();
         }
-        
-        // If this was a new intent (i.e., the mIsNewIntent flag got set to true by
-        // onNewIntent), then close the search dialog if needed, because it probably
-        // came from the user pressing 'home' (rather than, for example, pressing 'back').
-        if (mIsNewIntent) {
-            // Post to a handler so that this happens after the search dialog tries to open
-            // itself again.
-            mWorkspace.post(new Runnable() {
-                public void run() {
-                    ISearchManager searchManagerService = ISearchManager.Stub.asInterface(
-                            ServiceManager.getService(Context.SEARCH_SERVICE));
-                    try {
-                        searchManagerService.stopSearch();
-                    } catch (RemoteException e) {
-                        e(LOG_TAG, "error stopping search", e);
-                    }    
-                }
-            });
-        }
-        
+
         mIsNewIntent = false;
     }
 
@@ -952,7 +912,7 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         }
         if (appSearchData == null) {
             appSearchData = new Bundle();
-            appSearchData.putString(SearchManager.SOURCE, "launcher-search");
+            appSearchData.putString(SearchManager.QUERY, "launcher-search");
         }
 
         final SearchManager searchManager =
@@ -1002,9 +962,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
         menu.add(0, MENU_SEARCH, 0, R.string.menu_search)
                 .setIcon(android.R.drawable.ic_search_category_default)
                 .setAlphabeticShortcut(SearchManager.MENU_KEY);
-        menu.add(0, MENU_NOTIFICATIONS, 0, R.string.menu_notifications)
-                .setIcon(com.android.internal.R.drawable.ic_menu_notifications)
-                .setAlphabeticShortcut('N');
 
         final Intent settings = new Intent(android.provider.Settings.ACTION_SETTINGS);
         settings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
@@ -1038,9 +995,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
                 return true;
             case MENU_SEARCH:
                 onSearchRequested();
-                return true;
-            case MENU_NOTIFICATIONS:
-                showNotifications();
                 return true;
         }
 
@@ -1257,13 +1211,6 @@ public final class Launcher extends Activity implements View.OnClickListener, On
             }
         }
         return true;
-    }
-
-    private void showNotifications() {
-        final StatusBarManager statusBar = (StatusBarManager) getSystemService(STATUS_BAR_SERVICE);
-        if (statusBar != null) {
-            statusBar.expand();
-        }
     }
 
     private void startWallpaper() {

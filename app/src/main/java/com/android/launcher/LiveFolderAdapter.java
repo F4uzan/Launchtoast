@@ -141,8 +141,8 @@ class LiveFolderAdapter extends CursorAdapter {
 
             if (icon == null) {
                 final Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-                icon = new FastBitmapDrawable(Utilities.createBitmapThumbnail(bitmap, mContext));
-                mCustomIcons.put(holder.id, new SoftReference<Drawable>(icon));
+                icon = new FastBitmapDrawable(Utilities.createBitmapThumbnail(bitmap, context));
+                mCustomIcons.put(holder.id, new SoftReference<>(icon));
             }
         } else if (holder.iconResourceIndex != -1 && holder.iconPackageIndex != -1) {
             final String resource = cursor.getString(holder.iconResourceIndex);
@@ -154,7 +154,7 @@ class LiveFolderAdapter extends CursorAdapter {
                             cursor.getString(holder.iconPackageIndex));
                     final int id = resources.getIdentifier(resource,
                             null, null);
-                    icon = Utilities.createIconThumbnail(resources.getDrawable(id), mContext);
+                    icon = Utilities.createIconThumbnail(resources.getDrawable(id), context);
                     mIcons.put(resource, icon);
                 } catch (Exception e) {
                     // Ignore

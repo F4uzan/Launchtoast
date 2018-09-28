@@ -84,6 +84,9 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
     private float mLastMotionX;
     private float mLastMotionY;
 
+    private int mScrollX;
+    private int mScrollY;
+
     private final static int TOUCH_STATE_REST = 0;
     private final static int TOUCH_STATE_SCROLLING = 1;
 
@@ -471,7 +474,11 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
 
     @Override
     public boolean isOpaque() {
-        return !mWallpaper.hasAlpha();
+        if (mWallpaperLoaded) {
+            return !mWallpaper.hasAlpha();
+        } else {
+            return true;
+        }
     }
 
     @Override
@@ -490,7 +497,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
             }
         } else if (mLauncher.isDrawerMoving()) {
             restore = true;
-            canvas.save(Canvas.CLIP_SAVE_FLAG);
+            canvas.save();
 
             final View view = mLauncher.getDrawerHandle();
             final int top = view.getTop() + view.getHeight();
@@ -500,11 +507,11 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
         }
 
         float x = mScrollX * mWallpaperOffset;
-        if (x + mWallpaperWidth < mRight - mLeft) {
-            x = mRight - mLeft - mWallpaperWidth;
+        if (x + mWallpaperWidth < getRight() - getLeft()) {
+            x = getRight() - getLeft() - mWallpaperWidth;
         }
 
-        canvas.drawBitmap(mWallpaper, x, (mBottom - mTop - mWallpaperHeight) / 2, mPaint);
+        canvas.drawBitmap(mWallpaper, x, (getBottom() - getTop() - mWallpaperHeight) / 2, mPaint);
 
         // ViewGroup.dispatchDraw() supports many features we don't need:
         // clip to padding, layout animation, animation listener, disappearing
@@ -1313,7 +1320,7 @@ public class Workspace extends ViewGroup implements DropTarget, DragSource, Drag
                                 mLauncher.getPackageManager(), info);
                         if (icon != null && icon != info.icon) {
                             info.icon.setCallback(null);
-                            info.icon = Utilities.createIconThumbnail(icon, mContext);
+                            info.icon = Utilities.createIconThumbnail(icon, getContext());
                             info.filtered = true;
                             ((TextView) view).setCompoundDrawablesWithIntrinsicBounds(null,
                                     info.icon, null, null);

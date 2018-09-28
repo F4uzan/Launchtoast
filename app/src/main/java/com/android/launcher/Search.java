@@ -18,18 +18,13 @@ package com.android.launcher;
 
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.server.search.SearchableInfo;
-import android.server.search.Searchables;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -194,7 +189,9 @@ public class Search extends LinearLayout
                     Configuration.HARDKEYBOARDHIDDEN_YES) {
                 InputMethodManager inputManager = (InputMethodManager)
                         getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.showSoftInputUnchecked(0, null);
+                if (inputManager != null) {
+                    inputManager.showSoftInput(this, 0);
+                }
             }
             
             // Start the animation, unless it has already started.

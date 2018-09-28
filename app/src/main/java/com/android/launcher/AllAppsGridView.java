@@ -42,7 +42,7 @@ public class AllAppsGridView extends GridView implements AdapterView.OnItemClick
     }
 
     public AllAppsGridView(Context context, AttributeSet attrs) {
-        this(context, attrs, com.android.internal.R.attr.gridViewStyle);
+        this(context, attrs, android.R.attr.gridViewStyle);
     }
 
     public AllAppsGridView(Context context, AttributeSet attrs, int defStyle) {
@@ -63,6 +63,7 @@ public class AllAppsGridView extends GridView implements AdapterView.OnItemClick
 
     @Override
     protected void onFinishInflate() {
+        super.onFinishInflate();
         setOnItemClickListener(this);
         setOnItemLongClickListener(this);
     }

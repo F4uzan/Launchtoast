@@ -46,7 +46,6 @@ import java.util.ArrayList;
 
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParser;
-import com.android.internal.util.XmlUtils;
 import com.android.launcher.LauncherSettings.Favorites;
 
 public class LauncherProvider extends ContentProvider {
@@ -407,7 +406,7 @@ public class LauncherProvider extends ContentProvider {
                     Favorites.ITEM_TYPE_WIDGET_PHOTO_FRAME,
             };
             
-            final ArrayList<ComponentName> bindTargets = new ArrayList<ComponentName>();
+            final ArrayList<ComponentName> bindTargets = new ArrayList<>();
             bindTargets.add(new ComponentName("com.android.alarmclock",
                     "com.android.alarmclock.AnalogAppWidgetProvider"));
             bindTargets.add(new ComponentName("com.android.camera",
@@ -503,7 +502,6 @@ public class LauncherProvider extends ContentProvider {
             try {
                 XmlResourceParser parser = mContext.getResources().getXml(R.xml.default_workspace);
                 AttributeSet attrs = Xml.asAttributeSet(parser);
-                XmlUtils.beginDocument(parser, TAG_FAVORITES);
 
                 final int depth = parser.getDepth();
 
